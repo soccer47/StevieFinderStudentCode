@@ -136,7 +136,7 @@ public class Finder {
                 }
 
             }
-            // Return whether current node represents end of real key or not
+            // Return value associated with current
             return current.value;
         }
 
@@ -154,30 +154,8 @@ public class Finder {
                 // Set charVal equal to the ASCII value of the current key's character
                 int charVal = remainder.charAt(0);
 
-                // If the value of the root char is less than the current Node, explore left link
-                if (charVal < curVal) {
-                    // If the littleKids TST of the current node hasn't been initialized, set littleKids to a new TST
-                    if (current.littleKids == null) {
-                        current.littleKids = new TST();
-                        // Set the root of the TST to a new Node with the char as the first char of the remaining key
-                        current.littleKids.root = new Node(remainder.charAt(0),null,null,null,null);
-                    }
-                    // Set the current node equal to the root of the littleKids TST
-                    current = current.littleKids.root;
-                }
-                // Otherwise if the value of the current character is greater than the current Node, explore right link
-                else if (charVal > curVal) {
-                    // If the bigKids TST of the current node hasn't been initialized, set bigKids to a new TST
-                    if (current.bigKids == null) {
-                        current.bigKids = new TST();
-                        // Set the root of the TST to a new Node with the char as the first char of the remaining key
-                        current.bigKids.root = new Node(remainder.charAt(0),null,null,null,null);
-                    }
-                    // Set the current node equal to the root of the bigKids TST
-                    current = current.bigKids.root;
-                }
-                // Otherwise, the current char is equal to the character of the current node, so explore the middle link
-                else {
+                // If the current char is equal to the character of the current node, so explore the middle link
+                if (charVal == curVal) {
                     // Cut off the first letter of the remainder, because the node of the current char has been visited
                     remainder = remainder.substring(1);
                     // If there are no more remaining chars in the key, break from the for loop to set the value
@@ -193,6 +171,28 @@ public class Finder {
                     }
                     // Set current to the root of the resulting suffix
                     current = current.middleKid.root;
+                }
+                // Otherwise if the value of the current character is greater than the current Node, explore right link
+                else if (charVal > curVal) {
+                    // If the bigKids TST of the current node hasn't been initialized, set bigKids to a new TST
+                    if (current.bigKids == null) {
+                        current.bigKids = new TST();
+                        // Set the root of the TST to a new Node with the char as the first char of the remaining key
+                        current.bigKids.root = new Node(remainder.charAt(0),null,null,null,null);
+                    }
+                    // Set the current node equal to the root of the bigKids TST
+                    current = current.bigKids.root;
+                }
+                // Otherwise, the value of the root char is less than the current Node, so explore left link
+                else {
+                    // If the littleKids TST of the current node hasn't been initialized, set littleKids to a new TST
+                    if (current.littleKids == null) {
+                        current.littleKids = new TST();
+                        // Set the root of the TST to a new Node with the char as the first char of the remaining key
+                        current.littleKids.root = new Node(remainder.charAt(0),null,null,null,null);
+                    }
+                    // Set the current node equal to the root of the littleKids TST
+                    current = current.littleKids.root;
                 }
 
             }
