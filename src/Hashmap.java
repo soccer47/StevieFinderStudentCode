@@ -3,15 +3,15 @@ import java.util.ArrayList;
 public class Hashmap {
 
     // Default size of the hashmap
-    private int DEFAULT_TABLE_SIZE = 29;
+    private final int DEFAULT_TABLE_SIZE = 29;
+    // Radix to be used for hashing key Strings
+    private final int RADIX = 256;
     // Current size of the hashmap
     private int tableSize;
     // Current number of key-value pairs in the hashmap
     private int keyCount;
     // Array holding the inputted key-value pairs
     private keyVal[] keyVals;
-    // List of all indexes in keyVals containing a key-value pair
-    private ArrayList<Integer> indexes = new ArrayList<>();
 
     // Initialize hashmap variables
     public Hashmap () {
@@ -26,7 +26,7 @@ public class Hashmap {
         int hash = 0;
         // Add the ASCII value of each letter
         for (int i = 0; i < key.length(); i++) {
-            hash += key.charAt(i);
+            hash = hash * RADIX + key.charAt(i);
         }
         // Return the hash of the String
         return hash;
@@ -37,12 +37,14 @@ public class Hashmap {
         // Increment recorded number of keys in Hashmap by 1
         keyCount++;
         // Resize the Hashmap if it's more than 50% full
-        if (keyCount >= tableSize / 2) {
+        if (keyCount > tableSize / 2) {
             resize();
         }
+        // Hashed value of key
+        int hashKey = hash(key);
         // Find the first open index on or after the modded hash value of the key in the Hashmap
         // Initially set the index where the key-value pair is to be added to the hash of the key % tableSize
-        int index = hash(key) % tableSize;
+        int index = hashKey % tableSize;
         while (keyVals[index] != null) {
             if (index < tableSize - 1) {
                 index++;
@@ -53,9 +55,7 @@ public class Hashmap {
             }
         }
         // Add the key-value pair to the first available index on or after the modded hash value
-        keyVals[index] = new keyVal(key, value, hash(key));
-        // Add the index to the list of indexes containing a key-value pair
-        indexes.add(index);
+        keyVals[index] = new keyVal(key, value, hashKey);
     }
 
     // Method to return the value associated with the inputted String in the hashmap, return invalid message otherwise
@@ -89,32 +89,30 @@ public class Hashmap {
         int newSpot;
         // New array (twice as large) to hold key-value pairs
         keyVal[] newKeyVals = new keyVal[tableSize];
-        // New list to hold all indexes in new array containing key-value pairs
-        ArrayList<Integer> newIndexes = new ArrayList<>();
 
         // Add all keys in keys to newKeys, and add all the values
-        for (int index : indexes) {
-            // Find the first open index on or after the modded hash value of the key in the Hashmap
-            // Initially set the index where the key-value pair is to be added to the hash of the key % tableSize
-            newSpot = keyVals[index].getHashKey() % tableSize;
-            while (newKeyVals[newSpot] != null) {
-                if (newSpot < tableSize - 1) {
-                    newSpot++;
+        for (int index = 0; index < keyVals.length; index++) {
+            // If a key-value pair exists at the index, add it to the new array
+            if (keyVals[index] != null) {
+                // Find the first open index on or after the modded hash value of the key in the Hashmap
+                // Initially set the index where the key-value pair is to be added to the hash of the key % tableSize
+                newSpot = keyVals[index].getHashKey() % tableSize;
+                while (newKeyVals[newSpot] != null) {
+                    if (newSpot < tableSize - 1) {
+                        newSpot++;
+                    }
+                    else {
+                        // Wrap around to the first index in the Hashmap if needed
+                        newSpot = 0;
+                    }
                 }
-                else {
-                    // Wrap around to the first index in the Hashmap if needed
-                    newSpot = 0;
-                }
+                // Add the key-value pair to the first available index on or after the modded hash value
+                newKeyVals[newSpot] = keyVals[index];
             }
-            // Add the key-value pair to the first available index on or after the modded hash value
-            newKeyVals[newSpot] = keyVals[index];
-            newIndexes.add(newSpot);
         }
 
         // Set key-value pair array to newKeyVals
         keyVals = newKeyVals;
-        // Update the list of non-empty indexes
-        indexes = newIndexes;
     }
 
 
