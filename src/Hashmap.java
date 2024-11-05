@@ -3,7 +3,7 @@ import java.util.ArrayList;
 public class Hashmap {
 
     // Default size of the hashmap
-    private final int DEFAULT_TABLE_SIZE = 29;
+    private final int DEFAULT_TABLE_SIZE = 100000;
     // Radix to be used for hashing key Strings
     private final int RADIX = 256;
     // Current size of the hashmap
@@ -28,6 +28,15 @@ public class Hashmap {
         for (int i = 0; i < key.length(); i++) {
             hash = hash * RADIX + key.charAt(i);
         }
+
+        // Add values dependent on characters in the key to diversify keys and reduce large clusters in Hashmap
+        // Add the value of the last character of the key multiplied by a large prime
+        hash += key.charAt(key.length() - 1) * 100019;
+        // Add the value of the first character of the key multiplied by a large prime
+        hash += key.charAt(0) * 99991;
+        // Add the value of a middle character of the key multiplied by a large number
+        hash += key.charAt(key.length() / 2) * 13729;
+
         // Return the hash of the String
         return hash;
     }
@@ -60,13 +69,15 @@ public class Hashmap {
 
     // Method to return the value associated with the inputted String in the hashmap, return invalid message otherwise
     public String get(String key) {
+        // Hashed value of key
+        int hashKey = hash(key);
         // Initially set the index to check to the hash of the key % tableSize
-        int index = hash(key) % tableSize;
+        int index = hashKey % tableSize;
         // Continue as long as an empty index hasn't been reached
         while (keyVals[index] != null) {
             // If the key at the index in keys matches the inputted key, return the value associated with the key
-            if (keyVals[index].getKey().equals(key)) {
-                return keyVals[index].getVal();
+            if (keyVals[index].key.equals(key)) {
+                return keyVals[index].val;
             }
             // Increment the index by 1 otherwise
             if (index < tableSize - 1) {
@@ -96,7 +107,7 @@ public class Hashmap {
             if (keyVals[index] != null) {
                 // Find the first open index on or after the modded hash value of the key in the Hashmap
                 // Initially set the index where the key-value pair is to be added to the hash of the key % tableSize
-                newSpot = keyVals[index].getHashKey() % tableSize;
+                newSpot = keyVals[index].hashKey % tableSize;
                 while (newKeyVals[newSpot] != null) {
                     if (newSpot < tableSize - 1) {
                         newSpot++;
@@ -118,7 +129,6 @@ public class Hashmap {
 
     // Key-Value pair object class
     public class keyVal {
-
         // String to hold key
         private String key;
         // String to hold value
@@ -131,20 +141,6 @@ public class Hashmap {
             key = theKey;
             val = theVal;
             hashKey = hashedKey;
-        }
-
-        // Getter Methods
-        // Method returning key of object
-        public String getKey() {
-            return key;
-        }
-        // Method returning value associated with key-value pair
-        public String getVal() {
-            return val;
-        }
-        // Method returning hashed value of key
-        public int getHashKey() {
-            return hashKey;
         }
     }
 
